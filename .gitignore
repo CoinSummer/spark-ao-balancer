@@ -1,0 +1,7 @@
+conf/config.yaml
+.idea
+logs/
+docker/
+Dockerfile
+docker_push.sh
+go.sum

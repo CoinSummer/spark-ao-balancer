@@ -1,0 +1,12 @@
+argus:
+  name: ""
+  bot_pk: "" //without "0x" prefix
+  bot_address: ""
+  argus: ""
+  safe: ""
+  arweave_address_hex: ""
+  rpc: ""
+  ws: ""
+slack:
+  token: ""
+  channel: ""
