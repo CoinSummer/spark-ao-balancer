@@ -1,6 +1,7 @@
 # Spark & AO 调仓平衡
 
-使用Cobo Argus来保证资金安全，监控到调仓条件时通过argus bot发起操作
+使用Cobo Argus来保证资金安全，监控到调仓条件时通过argus bot发起操作。  
+操作的bot需要加一个`余额监控`来保证有足够的资金来发起调仓tx
 
 
 ## 代码逻辑：  
