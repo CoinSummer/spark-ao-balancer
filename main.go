@@ -208,6 +208,7 @@ func main() {
 				lackStETH, err := wstETHContract.GetStETHByWstETH(nil, util.ToWei(lackWstETH, 18))
 				if err != nil {
 					handleErr(fmt.Errorf("wstETHContract.GetStETHByWstETH err: %s", err.Error()))
+					finishMovingFromSparkToAO()
 					continue
 				}
 				wstETHToStETHFormat := util.ToDecimal(lackStETH, 18)
@@ -215,6 +216,7 @@ func main() {
 				finalWstETH, err := wstETHContract.GetWstETHByStETH(nil, lackStETH)
 				if err != nil {
 					handleErr(fmt.Errorf("wstETHContract.GetWstETHByStETH err: %s", err.Error()))
+					finishMovingFromSparkToAO()
 					continue
 				}
 				//start combine argus tx
@@ -260,6 +262,7 @@ func main() {
 				stETHAmount, err := wstETHContract.GetStETHByWstETH(nil, util.ToWei(removeWstETHAmount, 18))
 				if err != nil {
 					handleErr(fmt.Errorf("wstETHContract.GetStETHByWstETH err: %s", err.Error()))
+					finishMovingFromSparkToAO()
 					continue
 				}
 				stETHAmountFormat := util.ToDecimal(stETHAmount, 18)
