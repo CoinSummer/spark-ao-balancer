@@ -91,8 +91,7 @@ func LiveClock() {
 	for true {
 		if time.Now().Unix()-int64(BlockTime) > 36 {
 			logger.Errorf("live check failed")
-			notify.SendMsg("Spark AO live check failed and restart", "Spark AO live check failed and restart")
-			handlePanic("live check failed")
+			handlePanic("live check failed, block time has over 36s delay with local time, try restart.")
 		}
 		time.Sleep(time.Second)
 	}
@@ -104,7 +103,7 @@ func handleErr(err error) {
 }
 
 func handlePanic(msg string) {
-	notify.SendMsg("❌Spark&AO get panic", "❌ go check auto restart and error msg: "+msg)
+	notify.SendMsg("🟡Spark&AO restart", "🟡 program auto restart and got msg: "+msg)
 	log.Panicf(msg)
 }
 
