@@ -108,7 +108,6 @@ func handlePanic(msg string) {
 }
 
 func main() {
-
 	aoStaking, _ = ao.NewAo(common.HexToAddress(AOStakingAddress), client)
 	//notify.SendMsg("Spark AO Start", "Spark AO Start")
 	configJ, _ := json.Marshal(config)
@@ -231,7 +230,7 @@ func main() {
 				opt.GasPrice = priorityGas
 				tx, err := argusService.ExecTransactions(opt, cdl)
 				if err != nil {
-					logger.Errorf("exec ao -> spark err: %s", err.Error())
+					handleErr(fmt.Errorf("exec ao -> spark err: %s", err.Error()))
 					finishMovingFromAOToSpark()
 					continue
 				}
@@ -280,7 +279,7 @@ func main() {
 				opt.GasPrice = priorityGas
 				tx, err := argusService.ExecTransactions(opt, cdl)
 				if err != nil {
-					logger.Errorf("exec spark -> ao err: %s", err.Error())
+					handleErr(fmt.Errorf("exec spark -> ao err: %s", err.Error()))
 					finishMovingFromSparkToAO()
 					continue
 				}
