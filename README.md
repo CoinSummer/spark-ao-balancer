@@ -24,7 +24,7 @@ Health Factor计算方法 ([from spark contract: GenericLogic.sol: 172](https://
 代码打包成docker运行，[镜像地址](https://hub.docker.com/r/horizont9/spark_ao/tags)
 
 ```dockerfile
-docker run -d --restart=always --name spark_ao -v /path/to/config.yaml:/app/conf/config.yaml horizont9/spark_ao:v0.0.5
+docker run -d --restart=always --name spark_ao -v /path/to/config.yaml:/app/conf/config.yaml horizont9/spark_ao:v0.0.6
 ```
 
 根据[config模板](./conf/config.yaml.example)填写参数并挂载到容器下  
