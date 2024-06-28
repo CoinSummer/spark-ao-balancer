@@ -24,7 +24,7 @@ Health Factor计算方法 ([from spark contract: GenericLogic.sol: 172](https://
 代码打包成docker运行，[镜像地址](https://hub.docker.com/r/horizont9/spark_ao/tags)
 
 ```dockerfile
-docker run -d --restart=always --name spark_ao -v /path/to/config.yaml:/app/conf/config.yaml horizont9/spark_ao:v0.0.4
+docker run -d --restart=always --name spark_ao -v /path/to/config.yaml:/app/conf/config.yaml horizont9/spark_ao:v0.0.5
 ```
 
 根据[config模板](./conf/config.yaml.example)填写参数并挂载到容器下  
@@ -32,8 +32,8 @@ docker run -d --restart=always --name spark_ao -v /path/to/config.yaml:/app/conf
 代码中如果检测到block时间与本地时间戳存在超时的情况（36s）下会触发panic
 ```go
 func handlePanic(msg string) {
-	notify.SendMsg("❌Spark&AO get panic and try restart", "❌ go check auto restart status, error msg: "+msg)
-	log.Panicf(msg)
+    notify.SendMsg("🟡Spark&AO restart", "🟡 program auto restart and got msg: "+msg)
+    log.Panicf(msg)
 }
 ```
 会导致程序停止，配合docker中 ```--restart=aways``` 来先进行自动重启并发送通知，需要查看日志进行进一步排查原因。

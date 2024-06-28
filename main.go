@@ -120,7 +120,7 @@ func main() {
 	for {
 		select {
 		case err := <-sub.Err():
-			handlePanic("wss err: " + err.Error())
+			log.Panicf("wss err: " + err.Error()) //not send notify
 		case header := <-headers:
 			logger.Infof("==============================")
 			logger.Infof("[Block] block height: %d, blockTime: %d", header.Number, header.Time)
@@ -226,7 +226,7 @@ func main() {
 				c3 := MakeSupplyWstETHToSparkCallData(common.HexToAddress(wstETHAddress), finalWstETH, common.HexToAddress(config.Safe), 0)
 				cdl = append(cdl, c3)
 				opt, _ := argusService.GetTransactOpts()
-				//opt.NoSend = true
+				opt.NoSend = true
 				opt.GasPrice = priorityGas
 				tx, err := argusService.ExecTransactions(opt, cdl)
 				if err != nil {
@@ -275,7 +275,7 @@ func main() {
 				c3 := MakeAOStakeCallData(big.NewInt(0), stETHAmount, arweaveAddress)
 				cdl = append(cdl, c3)
 				opt, _ := argusService.GetTransactOpts()
-				//opt.NoSend = true
+				opt.NoSend = true
 				opt.GasPrice = priorityGas
 				tx, err := argusService.ExecTransactions(opt, cdl)
 				if err != nil {
