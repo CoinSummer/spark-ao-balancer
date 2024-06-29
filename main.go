@@ -91,7 +91,7 @@ func LiveClock() {
 	for true {
 		if time.Now().Unix()-int64(BlockTime) > 36 {
 			logger.Errorf("live check failed")
-			handlePanic("live check failed, block time has over 36s delay with local time, try restart.")
+			log.Panicf("live check failed, block time has over 36s delay with local time, try restart.")
 		}
 		time.Sleep(time.Second)
 	}
