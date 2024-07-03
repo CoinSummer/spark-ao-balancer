@@ -6,6 +6,7 @@ import (
 	"errors"
 	"eth_spark_ao/pkg/base"
 	"eth_spark_ao/pkg/contracts/ao"
+	"eth_spark_ao/pkg/contracts/erc20"
 	spark_address_privider "eth_spark_ao/pkg/contracts/spark_address_provider"
 	"eth_spark_ao/pkg/contracts/spark_price_oracle"
 	"eth_spark_ao/pkg/contracts/spark_staking"
@@ -451,4 +452,33 @@ func MakeSparkRepayDAICallData(asset common.Address, amount *big.Int, interestRa
 	}
 	callData := argus.MakeCallData(common.HexToAddress(SparkStakingAddress), big.NewInt(0), txData)
 	return callData
+}
+
+func ExistScript() {
+	var cdl []argus.CallData
+	//todo: fill dai amount
+	c1 := MakeSparkRepayDAICallData(common.HexToAddress(DAIAddress), util.ToWei("0", 18), big.NewInt(2), common.HexToAddress(config.Safe))
+	cdl = append(cdl, c1)
+
+	spwstETHContract, _ := erc20.NewErc20(common.HexToAddress("0x12b54025c112aa61face2cdb7118740875a566e9"), client)
+	spwstETHbalance, _ := spwstETHContract.BalanceOf(nil, common.HexToAddress(config.Safe))
+	//todo: fix wstETH amount
+	c2 := MakeWithdrawWstETHToSparkCallData(common.HexToAddress(wstETHAddress), spwstETHbalance, common.HexToAddress(config.Safe))
+	cdl = append(cdl, c2)
+
+	c3 := MakeUnWrapWstETHCallData(spwstETHbalance)
+	cdl = append(cdl, c3)
+
+	aoData, _ := aoStaking.UsersData(nil, common.HexToAddress(config.Safe), big.NewInt(0))
+	c4 := MakeAOWithdrawCallData(big.NewInt(0), aoData.Deposited, arweaveAddress)
+	cdl = append(cdl, c4)
+
+	opt, _ := argusService.GetTransactOpts()
+	opt.NoSend = true
+	opt.GasLimit = 8000000
+
+	tx, _ := argusService.ExecTransactions(opt, cdl)
+	j, _ := json.Marshal(tx)
+	logger.Infof("exec tx: %s", string(j))
+	return
 }
