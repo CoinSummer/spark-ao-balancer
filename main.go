@@ -110,7 +110,6 @@ func handlePanic(msg string) {
 
 func main() {
 	aoStaking, _ = ao.NewAo(common.HexToAddress(AOStakingAddress), client)
-	//notify.SendMsg("Spark AO Start", "Spark AO Start")
 	configJ, _ := json.Marshal(config)
 	logger.Infof("config auto check: %s", configJ)
 	go LiveClock()
@@ -241,7 +240,7 @@ func main() {
 					handleErr(errC)
 				} else {
 					logger.Warnf("exec ao -> spark success: %s", tx.Hash().String())
-					msg := fmt.Sprintf("✅ Spark health %f, move %f stETH from AO to Spark. tx: https://etherscan.io/tx/%s", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(lackStETH, 18).InexactFloat64(), tx.Hash().String())
+					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.55 \n Spark health %f, move %f stETH from AO to Spark.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.52", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(lackStETH, 18).InexactFloat64(), tx.Hash().String())
 					go notify.SendMsg("Spark&AO Health Factor Changing", msg)
 				}
 				finishMovingFromAOToSpark()
@@ -290,7 +289,7 @@ func main() {
 					handleErr(errC)
 				} else {
 					logger.Warnf("exec spark -> ao success: %s", tx.Hash().String())
-					msg := fmt.Sprintf("✅ Spark health %f, move %f stETH from Spark to AO. tx: https://etherscan.io/tx/%s", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(stETHAmount, 18).InexactFloat64(), tx.Hash().String())
+					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.55 \n Spark health %f, move %f stETH from Spark to AO.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.52", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(stETHAmount, 18).InexactFloat64(), tx.Hash().String())
 					go notify.SendMsg("Spark&AO Health Factor Changing", msg)
 				}
 				finishMovingFromSparkToAO()
