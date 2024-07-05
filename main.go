@@ -126,7 +126,7 @@ func main() {
 			logger.Infof("[Block] block height: %d, blockTime: %d", header.Number, header.Time)
 			BlockTime = header.Time
 			suggestGas, _ := client.SuggestGasPrice(context.Background())
-			priorityGas := new(big.Int).Mul(suggestGas, big.NewInt(17))
+			priorityGas := new(big.Int).Mul(suggestGas, big.NewInt(15))
 			priorityGas = new(big.Int).Div(priorityGas, big.NewInt(10))
 			logger.Infof("[Gas] suggest gas: %f, priority gas: %f", util.ToDecimal(suggestGas, 9).InexactFloat64(), util.ToDecimal(priorityGas, 9).InexactFloat64())
 
