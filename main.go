@@ -10,6 +10,7 @@ import (
 	spark_address_privider "eth_spark_ao/pkg/contracts/spark_address_provider"
 	"eth_spark_ao/pkg/contracts/spark_price_oracle"
 	"eth_spark_ao/pkg/contracts/spark_staking"
+	"eth_spark_ao/pkg/contracts/stETH"
 	"eth_spark_ao/pkg/contracts/wstETH"
 	"eth_spark_ao/pkg/slack"
 	"eth_spark_ao/util"
@@ -33,7 +34,7 @@ const wstETHAddress = "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
 const DAIAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F"
 
 var SparkTooLowHealthFactor = big.NewInt(15 * 1e17)
-var SparkTooHighHealthFactor = big.NewInt(155 * 1e16)
+var SparkTooHighHealthFactor = big.NewInt(158 * 1e16)
 
 var logger *logrus.Logger
 var client *ethclient.Client
@@ -200,7 +201,7 @@ func main() {
 					continue
 				}
 				logger.Warnf("health factor < 1.5(%f), move AO stETH Spark", util.ToDecimal(healthFactor, 18).InexactFloat64())
-				targetSupplyAmount := 1.52 * totalDebtBase / liquidationThreshold
+				targetSupplyAmount := 1.54 * totalDebtBase / liquidationThreshold
 				lackAmount := targetSupplyAmount - totalCollateralBase
 				lackWstETH := lackAmount / wstETHPriceFormat.InexactFloat64()
 				lackStETH, err := wstETHContract.GetStETHByWstETH(nil, util.ToWei(lackWstETH, 18))
@@ -240,18 +241,18 @@ func main() {
 					handleErr(errC)
 				} else {
 					logger.Warnf("exec ao -> spark success: %s", tx.Hash().String())
-					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.55 \n Spark health %f, move %f stETH from AO to Spark.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.52", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(lackStETH, 18).InexactFloat64(), tx.Hash().String())
+					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.58 \n Spark health %f, move %f stETH from AO to Spark.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.54", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(lackStETH, 18).InexactFloat64(), tx.Hash().String())
 					go notify.SendMsg("Spark&AO Health Factor Changing", msg)
 				}
 				finishMovingFromAOToSpark()
 			}
 			if healthFactor.Cmp(SparkTooHighHealthFactor) == 1 {
-				// health factor > 1.55, move wstETH and supply to AO
+				// health factor > 1.58, move wstETH and supply to AO
 				if !startMovingFromSparkToAO() {
 					continue
 				}
-				logger.Warnf("health factor > 1.55(%f), move Spark wstETH and supply to AO", util.ToDecimal(healthFactor, 18).InexactFloat64())
-				targetSupplyAmount := 1.52 * totalDebtBase / liquidationThreshold
+				logger.Warnf("health factor > 1.58(%f), move Spark wstETH and supply to AO", util.ToDecimal(healthFactor, 18).InexactFloat64())
+				targetSupplyAmount := 1.54 * totalDebtBase / liquidationThreshold
 				logger.Warnf("target amount value is: %f", targetSupplyAmount)
 				logger.Warnf("remove amount value is: %f", totalCollateralBase-targetSupplyAmount)
 				removeWstETHAmount := (totalCollateralBase - targetSupplyAmount) / wstETHPriceFormat.InexactFloat64()
@@ -289,7 +290,7 @@ func main() {
 					handleErr(errC)
 				} else {
 					logger.Warnf("exec spark -> ao success: %s", tx.Hash().String())
-					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.55 \n Spark health %f, move %f stETH from Spark to AO.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.52", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(stETHAmount, 18).InexactFloat64(), tx.Hash().String())
+					msg := fmt.Sprintf("✅ Spark Rebalance Success\n Condition：Spark Health < 1.5 Or Spark Health > 1.58 \n Spark health %f, move %f stETH from Spark to AO.\n tx: https://etherscan.io/tx/%s \n After rebalance Spark Health is: 1.54", util.ToDecimal(healthFactor, 18).InexactFloat64(), util.ToDecimal(stETHAmount, 18).InexactFloat64(), tx.Hash().String())
 					go notify.SendMsg("Spark&AO Health Factor Changing", msg)
 				}
 				finishMovingFromSparkToAO()
@@ -434,6 +435,15 @@ func checkTx(tx *types.Transaction) error {
 }
 
 // ======================= init
+
+func MakeWrapETHCallData(relf common.Address, bigInt *big.Int) argus.CallData {
+	txData, err := argus.MakeTxDataByAbi(stETH.StETHMetaData.ABI, "submit", relf)
+	if err != nil {
+		handlePanic("argus.MakeTxDataByAbi err: " + err.Error())
+	}
+	callData := argus.MakeCallData(common.HexToAddress("0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"), bigInt, txData)
+	return callData
+}
 
 func MakeSparkBorrowDAICallData(asset common.Address, amount *big.Int, interestRateMode *big.Int, referralCode uint16, onBehalfOf common.Address) argus.CallData {
 	txData, err := argus.MakeTxDataByAbi(spark_staking.SparkStakingMetaData.ABI, "borrow", asset, amount, interestRateMode, referralCode, onBehalfOf)
