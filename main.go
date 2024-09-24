@@ -130,7 +130,14 @@ func main() {
 			priorityGas := new(big.Int).Mul(suggestGas, big.NewInt(15))
 			priorityGas = new(big.Int).Div(priorityGas, big.NewInt(10))
 			logger.Infof("[Gas] suggest gas: %f, priority gas: %f", util.ToDecimal(suggestGas, 9).InexactFloat64(), util.ToDecimal(priorityGas, 9).InexactFloat64())
-
+			//get ao data
+			aoData, err := aoStaking.UsersData(nil, common.HexToAddress(config.Safe), big.NewInt(0))
+			if err != nil {
+				handleErr(fmt.Errorf("aoStaking.UsersData err: %s", err.Error()))
+				continue
+			}
+			aoDepositAmountFormat := util.ToDecimal(aoData.Deposited, 18).InexactFloat64()
+			logger.Infof("[AO] ao now staking %.2f stETH", aoDepositAmountFormat)
 			//get now block's oracle address and price info
 			sparkAddressProviderAddr, err := sparkStaking.ADDRESSESPROVIDER(nil)
 			if err != nil {
@@ -211,6 +218,13 @@ func main() {
 					continue
 				}
 				wstETHToStETHFormat := util.ToDecimal(lackStETH, 18)
+				if lackStETH.Cmp(aoData.Deposited) == 1 {
+					//ao stETH not enough
+					msg := fmt.Sprintf("AO's stETH balance not enough to move to spark, need `%f`, only have `%f`", wstETHToStETHFormat.InexactFloat64(), aoDepositAmountFormat)
+					logger.Errorf(msg)
+					go notify.SendMsg("Spark&AO Lack Supply", msg)
+					lackStETH = aoData.Deposited
+				}
 				logger.Warnf("AO need remove %f stETH and wrap to wstETH(%f) to supply Spark", wstETHToStETHFormat.InexactFloat64(), lackWstETH)
 				finalWstETH, err := wstETHContract.GetWstETHByStETH(nil, lackStETH)
 				if err != nil {
